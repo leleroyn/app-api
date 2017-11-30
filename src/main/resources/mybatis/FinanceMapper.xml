@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ucs.ganzhou.app.api.mapper.FinanceMapper">
+    <select id="getRecommendProduct"  resultMap="getFinanceRM">
+        SELECT   project_name ,investment_interest, duration,amount, project_start_time, min_invest_parts_count
+        FROM  financing  LIMIT 1
+    </select>
+    <resultMap type="com.ucs.ganzhou.app.api.model.Finance" id="getFinanceRM">
+        <id column="id" property="id"/>
+        <result column="project_name" property="projectName"/>
+        <result column="investment_interest" property="rate"/>
+        <result column="duration" property="duration"/>
+        <result column="amount" property="amount"/>
+        <result column="project_start_time" property="beginTime"/>
+        <result column="min_invest_parts_count" property="minBuyAmount"/>
+    </resultMap>
+
+    <select id="getOrderInfo" parameterType="com.ucs.ganzhou.app.api.model.OrderInfoRequestModel" resultType="com.ucs.ganzhou.app.api.model.OrderInfoResponseModel">
+        SELECT  now() createTime, 2000 amount,1 orderStatus
+    </select>
+
+    <select id="getCustomerAssets" parameterType="java.lang.String" resultType="java.util.Map">
+        SELECT 50000 totalAmount,350.53 totalIncome, 60000 possessionAsset, 2000.25 frozenAmount
+    </select>
+
+</mapper>
