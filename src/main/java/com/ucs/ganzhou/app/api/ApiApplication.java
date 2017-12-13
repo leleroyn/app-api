@@ -18,34 +18,7 @@ import javax.sql.DataSource;
 
 @EnableAutoConfiguration
 @SpringBootApplication
-@ComponentScan
-@MapperScan("com.ucs.ganzhou.app.api.mapper")
-class ApiApplication {
-
-	@Bean
-	@ConfigurationProperties(prefix="spring.datasource")
-	public DataSource dataSource() {
-		return new org.apache.tomcat.jdbc.pool.DataSource();
-	}
-
-	@Bean
-	public SqlSessionFactory sqlSessionFactoryBean() throws Exception {
-
-		SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
-		sqlSessionFactoryBean.setDataSource(dataSource());
-
-		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-
-		sqlSessionFactoryBean.setMapperLocations(resolver.getResources("classpath:/mybatis/*.xml"));
-
-		return sqlSessionFactoryBean.getObject();
-	}
-
-	@Bean
-	public PlatformTransactionManager transactionManager() {
-		return new DataSourceTransactionManager(dataSource());
-	}
-
+public class ApiApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(ApiApplication.class, args);
 	}

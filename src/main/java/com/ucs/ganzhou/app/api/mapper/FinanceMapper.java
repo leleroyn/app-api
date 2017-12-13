@@ -1,10 +1,12 @@
 package com.ucs.ganzhou.app.api.mapper;
 import  com.ucs.ganzhou.app.api.model.*;
+import org.apache.ibatis.annotations.Mapper;
 
 import java.util.Map;
 
+@Mapper
 public interface FinanceMapper {
-    public  Finance getRecommendProduct();
-    public OrderInfoResponseModel getOrderInfo(OrderInfoRequestModel orderInfoRequestModel);
-    public Map<String,String> getCustomerAssets(String customerId);
+    Finance getRecommendProduct();
+    OrderInfoResponseModel getOrderInfo(OrderInfoRequestModel orderInfoRequestModel);
+    Map<String,String> getCustomerAssets(String customerId);
 }

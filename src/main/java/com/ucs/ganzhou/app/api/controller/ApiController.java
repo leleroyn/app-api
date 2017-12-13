@@ -3,12 +3,13 @@ package com.ucs.ganzhou.app.api.controller;
 import com.ucs.ganzhou.app.api.model.Finance;
 import com.ucs.ganzhou.app.api.model.OrderInfoRequestModel;
 import com.ucs.ganzhou.app.api.model.OrderInfoResponseModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.ucs.ganzhou.app.api.service.*;
 
@@ -20,7 +21,7 @@ import com.ucs.ganzhou.app.api.utils.*;
 public class ApiController {
 
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    private Logger logger = Logger.getLogger(ApiController.class);
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
     private FinanceService financeService;
 
@@ -62,11 +63,11 @@ public class ApiController {
         String  requestId = UUID.randomUUID().toString();
         logger.debug(String.format("【%s】getRecommendProduct IN：%s",requestId,requestBody));
 
-        Map<String,String> requsetParms = XmlUtils.Dom2Map(requestBody);
+        Map<String,String> requestParms = XmlUtils.Dom2Map(requestBody);
         OrderInfoRequestModel orderInfo = new OrderInfoRequestModel();
-        orderInfo.setOrderNo(requsetParms.get("orderNo"));
-        orderInfo.setCustomerId(requsetParms.get("customerId"));
-        orderInfo.setSerialNo(requsetParms.get("serialNo"));
+        orderInfo.setOrderNo(requestParms.get("orderNo"));
+        orderInfo.setCustomerId(requestParms.get("customerId"));
+        orderInfo.setSerialNo(requestParms.get("serialNo"));
 
         OrderInfoResponseModel orderInfoResponseModel = financeService.getOrderInfo(orderInfo);
         Map<String,String> responseObject = new LinkedHashMap<String,String>();
@@ -95,8 +96,8 @@ public class ApiController {
        String  requestId = UUID.randomUUID().toString();
        logger.debug(String.format("【%s】getRecommendProduct IN：%s",requestId,requestBody));
 
-       Map<String,String> requsetParms = XmlUtils.Dom2Map(requestBody);
-       String customerId = requsetParms.get("customerId");
+       Map<String,String> requestParms = XmlUtils.Dom2Map(requestBody);
+       String customerId = requestParms.get("customerId");
        Map<String,String> customerAssetsMap = financeService.getCustomerAssets(customerId);
        Map<String,Object> responseObject = new LinkedHashMap<String,Object>();
        if(customerAssetsMap.isEmpty()){
