@@ -4,33 +4,74 @@
     <cache readOnly="true" flushInterval="10000" />
 
     <select id="getRecommendProduct" resultType="com.ucs.ganzhou.app.api.model.Finance">
-            SELECT TOP 1
-                    F.ProjectName AS projectName ,
-                    F.InvestmentInterest /100.0 AS rate ,
-                    F.Duration AS duration ,
-                    F.Amount AS amount ,
-                    F.ProjectBeginTime AS beginTime ,
-                    F.MinInvestPartsCount AS minBuyAmount
-            FROM   F_Financing F
-            WHERE  ProjectStatus = 1
-            ORDER BY CreateTime DESC
+        SELECT TOP 1
+            ProjectName AS projectName ,
+            InvestmentInterest /100.0 AS rate ,
+            Duration AS duration ,
+            Amount AS amount ,
+            ProjectBeginTime AS beginTime ,
+            MinInvestPartsCount AS minBuyAmount
+        FROM   V_Financing_App
+        WHERE ProjectType = 0 OR (ProjectType = 1 AND IsExclusivePublic =1)
+        ORDER BY VFinancingStatus,RN
     </select>
 
     <select id="getOrderInfo" parameterType="com.ucs.ganzhou.app.api.model.OrderInfoRequestModel" resultType="com.ucs.ganzhou.app.api.model.OrderInfoResponseModel" useCache="false">
         SELECT O.CreateTime AS createTime ,
-                O.PayAmount AS amount ,
-                CASE ( O.PayStatus )
-                  WHEN 1 THEN 1
-                  WHEN 7 THEN -1
-                  ELSE 0
-                END AS orderStatus
+               O.PayAmount AS amount ,
+               CASE ( O.PayStatus )
+               WHEN 1 THEN 1
+               WHEN 7 THEN -1
+               ELSE 0
+               END AS orderStatus
         FROM   F_Investment_Order O
-        LEFT JOIN [User] U ON O.PayUserId = U.UserId
+            LEFT JOIN [User] U ON O.PayUserId = U.UserId
         WHERE   U.BankUserId = #{customerId}  AND O.OrderNo = #{orderNo};
     </select>
-
-    <select id="getCustomerAssets" parameterType="java.lang.String" resultType="java.util.Map" useCache="false">
-        SELECT 50000 totalAmount,350.53 totalIncome, 60000 possessionAsset, 2000.25 frozenAmount
+    <!--投资总金额-->
+    <select id="getInvestAmount" parameterType="java.lang.String" resultType="java.lang.Float" useCache="false">
+        SELECT  ISNULL(SUM(O.PayAmount),0) AS totalAmount
+        FROM    F_Investment_Order O
+            LEFT JOIN [User] U ON O.PayUserId = U.UserId
+        WHERE   U.BankUserId = #{customerId}
+                AND O.PayStatus = 1
+    </select>
+    <!--累计收益-->
+    <select id="getTotalIncome" parameterType="java.lang.String" resultType="java.lang.Float" useCache="false">
+        SELECT  ISNULL(SUM(S.OrderAmount),0) AS totalIncome
+        FROM    dbo.F_Order_ServiceLog S
+            LEFT JOIN dbo.F_Investment_Order O ON S.OrderNo = O.OrderNo
+            LEFT JOIN [User] U ON U.UserId = O.PayUserId
+            LEFT JOIN dbo.F_Financing F ON F.FinancingId = O.FinancingId
+        WHERE   OrderType = 4
+                AND U.BankUserId =#{customerId}
+                AND F.ProjectStatus = 6
+                AND EXISTS ( SELECT 1
+                             FROM   dbo.F_SettlementSucRecord R
+                             WHERE  R.FinancingId = F.FinancingId )
+    </select>
+    <!--持仓金额-->
+    <select id="getPossessionAsset" parameterType="java.lang.String" resultType="java.lang.Float" useCache="false">
+        SELECT  ISNULL(SUM(O.PayAmount),0) AS possessionAsset
+        FROM    dbo.F_Investment_Order O
+            LEFT JOIN [User] U ON O.PayUserId = U.UserId
+            LEFT JOIN dbo.F_Financing F ON O.FinancingId = F.FinancingId
+        WHERE   U.BankUserId = #{customerId}
+                AND O.PayStatus = 1
+                AND F.ProjectStatus IN(1, 6)
+                AND NOT EXISTS ( SELECT 1
+                                 FROM   dbo.F_SettlementSucRecord S
+                                 WHERE  S.FinancingId = F.FinancingId )
+    </select>
+    <!--在途资金-->
+    <select id="getFrozenAmount" parameterType="java.lang.String" resultType="java.lang.Float" useCache="false">
+        SELECT ISNULL(SUM(O.PayAmount),0) AS frozenAmount
+        FROM    dbo.F_Investment_Order O
+            LEFT JOIN [User] U ON O.PayUserId = U.UserId
+            LEFT JOIN dbo.F_Financing F ON O.FinancingId = F.FinancingId
+        WHERE   U.BankUserId = #{customerId}
+                AND O.PayStatus = 1
+                AND F.ProjectStatus = 1
     </select>
 
 </mapper>

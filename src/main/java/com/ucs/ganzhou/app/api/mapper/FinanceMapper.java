@@ -1,6 +1,7 @@
 package com.ucs.ganzhou.app.api.mapper;
 import  com.ucs.ganzhou.app.api.model.*;
 import org.apache.ibatis.annotations.Mapper;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
@@ -8,5 +9,11 @@ import java.util.Map;
 public interface FinanceMapper {
     Finance getRecommendProduct();
     OrderInfoResponseModel getOrderInfo(OrderInfoRequestModel orderInfoRequestModel);
-    Map<String,String> getCustomerAssets(String customerId);
+
+    Float getInvestAmount(String customerId);
+    Float getTotalIncome(String customerId);
+    Float getPossessionAsset(String customerId);
+    Float getFrozenAmount(String customerId);
+
+
 }
